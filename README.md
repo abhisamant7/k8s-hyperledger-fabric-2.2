@@ -42,7 +42,7 @@ configtxgen:
  Commit SHA: 344fda602
  Go version: go1.14.4
  OS/Arch: linux/amd64
-☁  k8s-hyperledger-fabric-2.2 [master] ⚡  
+☁  k8s-hyperledger-fabric-2.2 [master] ⚡
 ```
 
 You then need to install Go and Nodejs... I would also suggest installing vue cli but I've included all the files you need for the front end.
@@ -87,9 +87,9 @@ docker exec -it cli-peer0-ibm bash -c 'peer chaincode query -C mainchannel -n re
 ## Commands
 Clean all docker things
 ```bash
-docker system prune 
+docker system prune
 docker container prune
-docker volume prune 
+docker volume prune
 docker rmi $(docker images -q) --force
 ```
 
@@ -144,3 +144,5 @@ fdsgdhfdhjyt
 ## ADDING OTHER ORGS
 
 [Click Here](https://github.com/happilymarrieddad/k8s-hyperledger-fabric-2.2/blob/master/ADDING_AN_ORG.md)
+
+
