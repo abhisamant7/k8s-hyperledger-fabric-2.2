@@ -81,7 +81,7 @@ kubectl apply -f network/production/ingress-nginx.yaml
 
 Now, lets add the NFS file system. Go ahead and login to your AWS account and go to EFS. Create a NFS file system in the same REGION as the cluster and make sure to SET THE VPC the same as the network. VERY IMPORTANT!!!! Also, create mount points and set them to include ALL of the permissions for the network (should be for of them). Now, we can create the storage by using the PV and PVC yaml files. We're going to use multiple PVC's just to show how to do that.
 ```bash
-kubectl apply -f network/production/storage/pv.yaml 
+kubectl apply -f network/production/storage/pv.yaml
 kubectl apply -f network/production/storage/pvc.yaml
 kubectl apply -f network/minikube/storage/tests 
 ```
@@ -104,7 +104,7 @@ root@example1-657d584cc7-qdgzx:/host# mkdir files
 root@example1-657d584cc7-qdgzx:/host# ls
 files
 root@example1-657d584cc7-qdgzx:/host# echo "Hello World" >> test.txt
-root@example1-657d584cc7-qdgzx:/host# 
+root@example1-657d584cc7-qdgzx:/host#
 ```
 
 Other terminal
@@ -116,9 +116,9 @@ example2-fdcd6dfc5-v7p28    1/1     Running   0          41s
 example2-fdcd6dfc5-x8snv    1/1     Running   0          41s
 ☁  k8s-hyperledger-fabric-2.2 [master] ⚡  kubectl exec -it example2-fdcd6dfc5-v7p28 -- bash
 root@example2-fdcd6dfc5-v7p28:/# cd host
-root@example2-fdcd6dfc5-v7p28:/host# cat test.txt 
+root@example2-fdcd6dfc5-v7p28:/host# cat test.txt
 Hello World
-root@example2-fdcd6dfc5-v7p28:/host# 
+root@example2-fdcd6dfc5-v7p28:/host#
 ```
 
 Okay, now we can just create the network the same as we would in minikube.
@@ -129,7 +129,7 @@ example1-6858b4f776-5pgls   1/1     Running   0          17s
 example1-6858b4f776-q92vv   1/1     Running   0          17s
 example2-55fcbb9cbd-drzwn   1/1     Running   0          17s
 example2-55fcbb9cbd-sv4c8   1/1     Running   0          17s
-☁  k8s-hyperledger-fabric-2.2 [master] ⚡ 
+☁  k8s-hyperledger-fabric-2.2 [master] ⚡
 ```
 
 We'll use one of these to setup the files for the network
@@ -213,7 +213,7 @@ Go ahead and check the logs and see that the orderers have selected a leader lik
 
 We should be able to start the peers now
 ```bash
-kubectl apply -f network/minikube/orgs/ibm/couchdb 
+kubectl apply -f network/minikube/orgs/ibm/couchdb
 kubectl apply -f network/minikube/orgs/oracle/couchdb
 
 kubectl apply -f network/minikube/orgs/ibm/
@@ -222,6 +222,12 @@ kubectl apply -f network/minikube/orgs/oracle/
 kubectl apply -f network/minikube/orgs/ibm/cli
 kubectl apply -f network/minikube/orgs/oracle/cli
 ```
+
+kubectl apply -f network/minikube/orgs/hp/couchdb
+
+kubectl apply -f network/minikube/orgs/hp/
+
+kubectl apply -f network/minikube/orgs/hp/cli
 
 
 Time to actually test the network

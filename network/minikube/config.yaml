@@ -39,7 +39,7 @@ client:
 
 channels:
 
-  mainchannel:
+  hpchannel:
 
     peers:
       peer0-ibm:
