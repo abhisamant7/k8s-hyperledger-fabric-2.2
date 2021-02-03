@@ -2,7 +2,7 @@ Organizations:
     - &orderer
         Name: orderer
         ID: orderer
-        MSPDir: /host/files/crypto-config/ordererOrganizations/orderer/msp
+        MSPDir: crypto-config/ordererOrganizations/orderer/msp
         Policies:
             Readers:
                 Type: Signature
@@ -16,7 +16,7 @@ Organizations:
     - &ibm
         Name: ibm
         ID: ibm
-        MSPDir: /host/files/crypto-config/peerOrganizations/ibm/msp
+        MSPDir: crypto-config/peerOrganizations/ibm/msp
         AnchorPeers:
             - Host: peer0-ibm-service
               Port: 7051
@@ -33,26 +33,26 @@ Organizations:
             Endorsement:
                 Type: Signature
                 Rule: "OR('ibm.member')"
-    - &oracle
-        Name: oracle
-        ID: oracle
-        MSPDir: /host/files/crypto-config/peerOrganizations/oracle/msp
+    - &hp
+        Name: hp
+        ID: hp
+        MSPDir: crypto-config/peerOrganizations/hp/msp
         AnchorPeers:
-            - Host: peer0-oracle-service
+            - Host: peer0-hp-service
               Port: 7051
         Policies:
             Readers:
                 Type: Signature
-                Rule: "OR('oracle.member')"
+                Rule: "OR('hp.member')"
             Writers:
                 Type: Signature
-                Rule: "OR('oracle.member')"
+                Rule: "OR('hp.member')"
             Admins:
                 Type: Signature
-                Rule: "OR('oracle.admin')"
+                Rule: "OR('hp.admin')"
             Endorsement:
                 Type: Signature
-                Rule: "OR('oracle.member')"
+                Rule: "OR('hp.member')"
 
 Capabilities:
     Global: &ChannelCapabilities
@@ -89,16 +89,16 @@ Orderer: &OrdererDefaults
         Consenters:
             - Host: orderer0-service
               Port: 7050
-              ClientTLSCert: /host/files/crypto-config/ordererOrganizations/orderer/orderers/orderer0/tls/server.crt
-              ServerTLSCert: /host/files/crypto-config/ordererOrganizations/orderer/orderers/orderer0/tls/server.crt
+              ClientTLSCert: crypto-config/ordererOrganizations/orderer/orderers/orderer0/tls/server.crt
+              ServerTLSCert: crypto-config/ordererOrganizations/orderer/orderers/orderer0/tls/server.crt
             - Host: orderer1-service
               Port: 7050
-              ClientTLSCert: /host/files/crypto-config/ordererOrganizations/orderer/orderers/orderer1/tls/server.crt
-              ServerTLSCert: /host/files/crypto-config/ordererOrganizations/orderer/orderers/orderer1/tls/server.crt
+              ClientTLSCert: crypto-config/ordererOrganizations/orderer/orderers/orderer1/tls/server.crt
+              ServerTLSCert: crypto-config/ordererOrganizations/orderer/orderers/orderer1/tls/server.crt
             - Host: orderer2-service
               Port: 7050
-              ClientTLSCert: /host/files/crypto-config/ordererOrganizations/orderer/orderers/orderer2/tls/server.crt
-              ServerTLSCert: /host/files/crypto-config/ordererOrganizations/orderer/orderers/orderer2/tls/server.crt
+              ClientTLSCert: crypto-config/ordererOrganizations/orderer/orderers/orderer2/tls/server.crt
+              ServerTLSCert: crypto-config/ordererOrganizations/orderer/orderers/orderer2/tls/server.crt
     Addresses:
         - orderer0-service:7050
         - orderer1-service:7050
@@ -156,8 +156,8 @@ Profiles:
             MAIN:
                 Organizations:
                     - *ibm
-                    - *oracle
-    
+                    - *hp
+
     MainChannel:
         Consortium: MAIN
         <<: *ChannelDefaults
@@ -165,6 +165,6 @@ Profiles:
             <<: *ApplicationDefaults
             Organizations:
                 - *ibm
-                - *oracle
+                - *hp
             Capabilities:
                 <<: *ApplicationCapabilities
