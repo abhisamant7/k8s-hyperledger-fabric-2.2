@@ -153,13 +153,13 @@ Profiles:
             Capabilities:
                 <<: *OrdererCapabilities
         Consortiums:
-            MAIN:
+            Main1:
                 Organizations:
                     - *ibm
                     - *hp
 
-    MainChannel:
-        Consortium: MAIN
+    HpChannel:
+        Consortium: Main1
         <<: *ChannelDefaults
         Application:
             <<: *ApplicationDefaults
