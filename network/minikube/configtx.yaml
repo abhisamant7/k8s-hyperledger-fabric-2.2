@@ -33,26 +33,26 @@ Organizations:
             Endorsement:
                 Type: Signature
                 Rule: "OR('ibm.member')"
-    - &oracle
-        Name: oracle
-        ID: oracle
-        MSPDir: crypto-config/peerOrganizations/oracle/msp
+    - &hp
+        Name: hp
+        ID: hp
+        MSPDir: crypto-config/peerOrganizations/hp/msp
         AnchorPeers:
-            - Host: peer0-oracle-service
+            - Host: peer0-hp-service
               Port: 7051
         Policies:
             Readers:
                 Type: Signature
-                Rule: "OR('oracle.member')"
+                Rule: "OR('hp.member')"
             Writers:
                 Type: Signature
-                Rule: "OR('oracle.member')"
+                Rule: "OR('hp.member')"
             Admins:
                 Type: Signature
-                Rule: "OR('oracle.admin')"
+                Rule: "OR('hp.admin')"
             Endorsement:
                 Type: Signature
-                Rule: "OR('oracle.member')"
+                Rule: "OR('hp.member')"
 
 Capabilities:
     Global: &ChannelCapabilities
@@ -156,8 +156,8 @@ Profiles:
             MAIN:
                 Organizations:
                     - *ibm
-                    - *oracle
-    
+                    - *hp
+
     MainChannel:
         Consortium: MAIN
         <<: *ChannelDefaults
@@ -165,6 +165,6 @@ Profiles:
             <<: *ApplicationDefaults
             Organizations:
                 - *ibm
-                - *oracle
+                - *hp
             Capabilities:
                 <<: *ApplicationCapabilities

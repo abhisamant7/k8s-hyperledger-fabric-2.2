@@ -8,7 +8,7 @@ client:
 
   logging:
     level: info
-  
+
   cryptoconfig:
     path: /home/nick/Projects/k8s-hyperledger-fabric-2.2/crypto-config
 
@@ -33,7 +33,7 @@ client:
       hashAlgorithm: "SHA2"
       softVerify: true
       level: 256
-  
+
   tlsCerts:
     systemCertPool: true
 
@@ -47,7 +47,7 @@ channels:
         chaincodeQuery: true
         ledgerQuery: true
         eventSource: true
-  
+
     policies:
       queryChannelConfig:
         minResponses: 1
@@ -65,12 +65,12 @@ organizations:
     peers:
       - peer0-ibm
       - peer1-ibm
-  oracle:
-    mspid: oracle
-    cryptopath: peerOrganizations/oracle/users/Admin@oracle/msp
+  hp:
+    mspid: hp
+    cryptopath: peerOrganizations/hp/users/Admin@hp/msp
     peers:
-      - peer0-oracle
-      - peer1-oracle
+      - peer0-hp
+      - peer1-hp
 
 orderers:
   _default:
@@ -80,30 +80,30 @@ orderers:
       keep-alive-permit: false
       fail-fast: false
       allow-insecure: false
-  
+
   orderer0:
     grpcOptions:
       ssl-target-name-override: orderer0
       grpc-max-send-message-length: 15
-    
+
     tlsCACerts:
       path: /home/nick/Projects/k8s-hyperledger-fabric-2.2/crypto-config/ordererOrganizations/orderer/msp/tlscacerts/orderers-ca-7054.pem
 
-  
+
   orderer1:
     grpcOptions:
       ssl-target-name-override: orderer1
       grpc-max-send-message-length: 15
-    
+
     tlsCACerts:
       path: /home/nick/Projects/k8s-hyperledger-fabric-2.2/crypto-config/ordererOrganizations/orderer/msp/tlscacerts/orderers-ca-7054.pem
 
-  
+
   orderer2:
     grpcOptions:
       ssl-target-name-override: orderer2
       grpc-max-send-message-length: 15
-    
+
     tlsCACerts:
       path: /home/nick/Projects/k8s-hyperledger-fabric-2.2/crypto-config/ordererOrganizations/orderer/msp/tlscacerts/orderers-ca-7054.pem
 
@@ -116,12 +116,12 @@ peers:
       keep-alive-permit: false
       fail-fast: false
       allow-insecure: false
-    
+
   peer0-ibm:
     grpcOptions:
       ssl-target-name-override: peer0-ibm
       grpc.http2.keepalive_time: 15
-    
+
     tlsCACerts:
       path: /home/nick/Projects/k8s-hyperledger-fabric-2.2/crypto-config/peerOrganizations/ibm/msp/tlscacerts/ibm-ca-7054.pem
 
@@ -129,26 +129,26 @@ peers:
     grpcOptions:
       ssl-target-name-override: peer1-ibm
       grpc.http2.keepalive_time: 15
-    
+
     tlsCACerts:
       path: /home/nick/Projects/k8s-hyperledger-fabric-2.2/crypto-config/peerOrganizations/ibm/msp/tlscacerts/ibm-ca-7054.pem
 
-    
-  peer0-oracle:
-    grpcOptions:
-      ssl-target-name-override: peer0-oracle
-      grpc.http2.keepalive_time: 15
-    
-    tlsCACerts:
-      path: /home/nick/Projects/k8s-hyperledger-fabric-2.2/crypto-config/peerOrganizations/oracle/msp/tlscacerts/oracle-ca-7054.pem
 
-  peer1-oracle:
+  peer0-hp:
     grpcOptions:
-      ssl-target-name-override: peer1-oracle
+      ssl-target-name-override: peer0-hp
       grpc.http2.keepalive_time: 15
-    
+
     tlsCACerts:
-      path: /home/nick/Projects/k8s-hyperledger-fabric-2.2/crypto-config/peerOrganizations/oracle/msp/tlscacerts/oracle-ca-7054.pem
+      path: /home/nick/Projects/k8s-hyperledger-fabric-2.2/crypto-config/peerOrganizations/hp/msp/tlscacerts/hp-ca-7054.pem
+
+  peer1-hp:
+    grpcOptions:
+      ssl-target-name-override: peer1-hp
+      grpc.http2.keepalive_time: 15
+
+    tlsCACerts:
+      path: /home/nick/Projects/k8s-hyperledger-fabric-2.2/crypto-config/peerOrganizations/hp/msp/tlscacerts/hp-ca-7054.pem
 
 entityMatchers:
 
@@ -163,15 +163,15 @@ entityMatchers:
       sslTargetOverrideUrlSubstitutionExp: peer1-ibm
       mappedHost: peer1-ibm
 
-    - pattern: (\w*)peer0-oracle(\w*)
+    - pattern: (\w*)peer0-hp(\w*)
       urlSubstitutionExp: localhost:9051
-      sslTargetOverrideUrlSubstitutionExp: peer0-oracle
-      mappedHost: peer0-oracle
+      sslTargetOverrideUrlSubstitutionExp: peer0-hp
+      mappedHost: peer0-hp
 
-    - pattern: (\w*)peer1-oracle(\w*)
+    - pattern: (\w*)peer1-hp(\w*)
       urlSubstitutionExp: localhost:10051
-      sslTargetOverrideUrlSubstitutionExp: peer1-oracle
-      mappedHost: peer1-oracle
+      sslTargetOverrideUrlSubstitutionExp: peer1-hp
+      mappedHost: peer1-hp
 
   orderer:
     - pattern: (\w*)orderer0(\w*)
@@ -183,7 +183,7 @@ entityMatchers:
       urlSubstitutionExp: localhost:8050
       sslTargetOverrideUrlSubstitutionExp: orderer1
       mappedHost: orderer1
-      
+
     - pattern: (\w*)orderer2(\w*)
       urlSubstitutionExp: localhost:9050
       sslTargetOverrideUrlSubstitutionExp: orderer2
