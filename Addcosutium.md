@@ -4,7 +4,7 @@ Adding an org
 Create folder to store data in
 ```bash
 export ENVIRONMENT=production
-export NEW_ORG_NAME=hp
+export NEW_ORG_NAME=dell
 export FOLDER_PATH=configs/${ENVIRONMENT}/${NEW_ORG_NAME}
 rm -rf $FOLDER_PATH
 mkdir -p $FOLDER_PATH/cas
@@ -13,6 +13,580 @@ mkdir -p $FOLDER_PATH/couchdb
 mkdir -p $FOLDER_PATH/peers
 ```
 
+
+Organizations:
+    - &orderer
+        Name: orderer
+        ID: orderer
+        MSPDir: /host/files/crypto-config/ordererOrganizations/orderer/msp
+        Policies:
+            Readers:
+                Type: Signature
+                Rule: "OR('orderer.member')"
+            Writers:
+                Type: Signature
+                Rule: "OR('orderer.member')"
+            Admins:
+                Type: Signature
+                Rule: "OR('orderer.admin')"
+    - &ibm
+        Name: ibm
+        ID: ibm
+        MSPDir: /host/files/crypto-config/peerOrganizations/ibm/msp
+        AnchorPeers:
+            - Host: peer0-ibm-service
+              Port: 7051
+        Policies:
+            Readers:
+                Type: Signature
+                Rule: "OR('ibm.member')"
+            Writers:
+                Type: Signature
+                Rule: "OR('ibm.member')"
+            Admins:
+                Type: Signature
+                Rule: "OR('ibm.admin')"
+            Endorsement:
+                Type: Signature
+                Rule: "OR('ibm.member')"
+    - &oracle
+        Name: oracle
+        ID: oracle
+        MSPDir: /host/files/crypto-config/peerOrganizations/oracle/msp
+        AnchorPeers:
+            - Host: peer0-oracle-service
+              Port: 7051
+        Policies:
+            Readers:
+                Type: Signature
+                Rule: "OR('oracle.member')"
+            Writers:
+                Type: Signature
+                Rule: "OR('oracle.member')"
+            Admins:
+                Type: Signature
+                Rule: "OR('oracle.admin')"
+            Endorsement:
+                Type: Signature
+                Rule: "OR('oracle.member')"
+    - &hp
+        Name: hp
+        ID: hp
+        MSPDir: /host/files/crypto-config/peerOrganizations/hp/msp
+        AnchorPeers:
+            - Host: peer0-hp-service
+              Port: 7051
+        Policies:
+            Readers:
+                Type: Signature
+                Rule: "OR('hp.member')"
+            Writers:
+                Type: Signature
+                Rule: "OR('hp.member')"
+            Admins:
+                Type: Signature
+                Rule: "OR('hp.admin')"
+            Endorsement:
+                Type: Signature
+                Rule: "OR('hp.member')"
+
+Capabilities:
+    Global: &ChannelCapabilities
+        V2_0: true
+    Orderer: &OrdererCapabilities
+        V2_0: true
+    Application: &ApplicationCapabilities
+        V2_0: true
+
+Application: &ApplicationDefaults
+    Organizations:
+    Policies:
+        Readers:
+            Type: ImplicitMeta
+            Rule: "ANY Readers"
+        Writers:
+            Type: ImplicitMeta
+            Rule: "ANY Writers"
+        Admins:
+            Type: ImplicitMeta
+            Rule: "MAJORITY Admins"
+        LifecycleEndorsement:
+            Type: ImplicitMeta
+            Rule: "ANY Endorsement"
+        Endorsement:
+            Type: ImplicitMeta
+            Rule: "ANY Endorsement"
+    Capabilities:
+        <<: *ApplicationCapabilities
+
+Orderer: &OrdererDefaults
+    OrdererType: etcdraft
+    EtcdRaft:
+        Consenters:
+            - Host: orderer0-service
+              Port: 7050
+              ClientTLSCert: /host/files/crypto-config/ordererOrganizations/orderer/orderers/orderer0/tls/server.crt
+              ServerTLSCert: /host/files/crypto-config/ordererOrganizations/orderer/orderers/orderer0/tls/server.crt
+            - Host: orderer1-service
+              Port: 7050
+              ClientTLSCert: /host/files/crypto-config/ordererOrganizations/orderer/orderers/orderer1/tls/server.crt
+              ServerTLSCert: /host/files/crypto-config/ordererOrganizations/orderer/orderers/orderer1/tls/server.crt
+            - Host: orderer2-service
+              Port: 7050
+              ClientTLSCert: /host/files/crypto-config/ordererOrganizations/orderer/orderers/orderer2/tls/server.crt
+              ServerTLSCert: /host/files/crypto-config/ordererOrganizations/orderer/orderers/orderer2/tls/server.crt
+    Addresses:
+        - orderer0:7050-service
+        - orderer1:7050-service
+        - orderer2:7050-service
+    BatchTimeout: 2s
+    BatchSize:
+        MaxMessageCount: 10
+        AbsoluteMaxBytes: 99 MB
+        PreferredMaxBytes: 512 KB
+    Kafka:
+        Brokers:
+            - 127.0.0.1:9092
+    Organizations:
+        - *orderer
+    Policies:
+        Readers:
+            Type: ImplicitMeta
+            Rule: "ANY Readers"
+        Writers:
+            Type: ImplicitMeta
+            Rule: "ANY Writers"
+        Admins:
+            Type: ImplicitMeta
+            Rule: "MAJORITY Admins"
+        BlockValidation:
+            Type: ImplicitMeta
+            Rule: "ANY Writers"
+
+Channel: &ChannelDefaults
+    Policies:
+        Readers:
+            Type: ImplicitMeta
+            Rule: "ANY Readers"
+        Writers:
+            Type: ImplicitMeta
+            Rule: "ANY Writers"
+        Admins:
+            Type: ImplicitMeta
+            Rule: "MAJORITY Admins"
+    Capabilities:
+        <<: *ChannelCapabilities
+
+Profiles:
+    MainChannel:
+        Consortium: MAIN
+        <<: *ChannelDefaults
+        Application:
+            <<: *ApplicationDefaults
+            Organizations:
+                - *ibm
+                - *oracle
+                - *hp
+            Capabilities:
+                <<: *ApplicationCapabilities
+
+
+
+Create necessary files
+```bash
+cat <<EOT > ${FOLDER_PATH}/configtx.yaml
+Organizations:
+    - &orderer
+        Name: orderer
+        ID: orderer
+        MSPDir: /host/files/crypto-config/ordererOrganizations/orderer/msp
+        Policies:
+            Readers:
+                Type: Signature
+                Rule: "OR('orderer.member')"
+            Writers:
+                Type: Signature
+                Rule: "OR('orderer.member')"
+            Admins:
+                Type: Signature
+                Rule: "OR('orderer.admin')"
+    - &ibm
+        Name: ibm
+        ID: ibm
+        MSPDir: /host/files/crypto-config/peerOrganizations/ibm/msp
+        AnchorPeers:
+            - Host: peer0-ibm-service
+              Port: 7051
+        Policies:
+            Readers:
+                Type: Signature
+                Rule: "OR('ibm.member')"
+            Writers:
+                Type: Signature
+                Rule: "OR('ibm.member')"
+            Admins:
+                Type: Signature
+                Rule: "OR('ibm.admin')"
+            Endorsement:
+                Type: Signature
+                Rule: "OR('ibm.member')"
+    - &oracle
+        Name: oracle
+        ID: oracle
+        MSPDir: /host/files/crypto-config/peerOrganizations/oracle/msp
+        AnchorPeers:
+            - Host: peer0-oracle-service
+              Port: 7051
+        Policies:
+            Readers:
+                Type: Signature
+                Rule: "OR('oracle.member')"
+            Writers:
+                Type: Signature
+                Rule: "OR('oracle.member')"
+            Admins:
+                Type: Signature
+                Rule: "OR('oracle.admin')"
+            Endorsement:
+                Type: Signature
+                Rule: "OR('oracle.member')"
+    - &hp
+        Name: hp
+        ID: hp
+        MSPDir: /host/files/crypto-config/peerOrganizations/hp/msp
+        AnchorPeers:
+            - Host: peer0-hp-service
+              Port: 7051
+        Policies:
+            Readers:
+                Type: Signature
+                Rule: "OR('hp.member')"
+            Writers:
+                Type: Signature
+                Rule: "OR('hp.member')"
+            Admins:
+                Type: Signature
+                Rule: "OR('hp.admin')"
+            Endorsement:
+                Type: Signature
+                Rule: "OR('hp.member')"
+
+    - &${NEW_ORG_NAME}
+        Name: ${NEW_ORG_NAME}
+        ID: ${NEW_ORG_NAME}
+        MSPDir: /host/files/crypto-config/peerOrganizations/${NEW_ORG_NAME}/msp
+        AnchorPeers:
+            - Host: peer0-${NEW_ORG_NAME}-service
+              Port: 7051
+        Policies:
+            Readers:
+                Type: Signature
+                Rule: "OR('${NEW_ORG_NAME}.member')"
+            Writers:
+                Type: Signature
+                Rule: "OR('${NEW_ORG_NAME}.member')"
+            Admins:
+                Type: Signature
+                Rule: "OR('${NEW_ORG_NAME}.admin')"
+            Endorsement:
+                Type: Signature
+                Rule: "OR('${NEW_ORG_NAME}.member')"
+
+Capabilities:
+    Global: &ChannelCapabilities
+        V2_0: true
+    Orderer: &OrdererCapabilities
+        V2_0: true
+    Application: &ApplicationCapabilities
+        V2_0: true
+
+Application: &ApplicationDefaults
+    Organizations:
+    Policies:
+        Readers:
+            Type: ImplicitMeta
+            Rule: "ANY Readers"
+        Writers:
+            Type: ImplicitMeta
+            Rule: "ANY Writers"
+        Admins:
+            Type: ImplicitMeta
+            Rule: "MAJORITY Admins"
+        LifecycleEndorsement:
+            Type: ImplicitMeta
+            Rule: "ANY Endorsement"
+        Endorsement:
+            Type: ImplicitMeta
+            Rule: "ANY Endorsement"
+    Capabilities:
+        <<: *ApplicationCapabilities
+
+Orderer: &OrdererDefaults
+    OrdererType: etcdraft
+    EtcdRaft:
+        Consenters:
+            - Host: orderer0-service
+              Port: 7050
+              ClientTLSCert: /host/files/crypto-config/ordererOrganizations/orderer/orderers/orderer0/tls/server.crt
+              ServerTLSCert: /host/files/crypto-config/ordererOrganizations/orderer/orderers/orderer0/tls/server.crt
+            - Host: orderer1-service
+              Port: 7050
+              ClientTLSCert: /host/files/crypto-config/ordererOrganizations/orderer/orderers/orderer1/tls/server.crt
+              ServerTLSCert: /host/files/crypto-config/ordererOrganizations/orderer/orderers/orderer1/tls/server.crt
+            - Host: orderer2-service
+              Port: 7050
+              ClientTLSCert: /host/files/crypto-config/ordererOrganizations/orderer/orderers/orderer2/tls/server.crt
+              ServerTLSCert: /host/files/crypto-config/ordererOrganizations/orderer/orderers/orderer2/tls/server.crt
+    Addresses:
+        - orderer0:7050-service
+        - orderer1:7050-service
+        - orderer2:7050-service
+    BatchTimeout: 2s
+    BatchSize:
+        MaxMessageCount: 10
+        AbsoluteMaxBytes: 99 MB
+        PreferredMaxBytes: 512 KB
+    Kafka:
+        Brokers:
+            - 127.0.0.1:9092
+    Organizations:
+        - *orderer
+    Policies:
+        Readers:
+            Type: ImplicitMeta
+            Rule: "ANY Readers"
+        Writers:
+            Type: ImplicitMeta
+            Rule: "ANY Writers"
+        Admins:
+            Type: ImplicitMeta
+            Rule: "MAJORITY Admins"
+        BlockValidation:
+            Type: ImplicitMeta
+            Rule: "ANY Writers"
+
+Channel: &ChannelDefaults
+    Policies:
+        Readers:
+            Type: ImplicitMeta
+            Rule: "ANY Readers"
+        Writers:
+            Type: ImplicitMeta
+            Rule: "ANY Writers"
+        Admins:
+            Type: ImplicitMeta
+            Rule: "MAJORITY Admins"
+    Capabilities:
+        <<: *ChannelCapabilities
+
+Profiles:
+    DellChannel:
+        Consortium: MAIN
+        <<: *ChannelDefaults
+        Application:
+            <<: *ApplicationDefaults
+            Organizations:
+                - *ibm
+                - *oracle
+                - *hp
+                - *${NEW_ORG_NAME}
+            Capabilities:
+                <<: *ApplicationCapabilities
+
+EOT
+
+
+cat <<EOT > ${FOLDER_PATH}/cas/${NEW_ORG_NAME}-ca-client-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ${NEW_ORG_NAME}-ca-client
+  labels: {
+    component: ${NEW_ORG_NAME}-ca-client,
+    type: ca
+  }
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: ${NEW_ORG_NAME}-ca-client
+      type: ca
+  template:
+    metadata:
+      labels:
+        component: ${NEW_ORG_NAME}-ca-client
+        type: ca
+    spec:
+      volumes:
+        - name: my-pv-storage
+          persistentVolumeClaim:
+            claimName: my-pv-claim
+      containers:
+        - name: ${NEW_ORG_NAME}-ca-client
+          image: hyperledger/fabric-ca:1.4.7
+          command: ["bash"]
+          args: ["/scripts/start-org-client.sh"]
+          env:
+            - name: FABRIC_CA_SERVER_HOME
+              value: /etc/hyperledger/fabric-ca-client
+            - name: ORG_NAME
+              value: ${NEW_ORG_NAME}
+            - name: CA_SCHEME
+              value: https
+            - name: CA_URL
+              value: "${NEW_ORG_NAME}-ca-service:7054"
+            - name: CA_USERNAME
+              value: admin
+            - name: CA_PASSWORD
+              value: adminpw
+            - name: CA_CERT_PATH
+              value: /etc/hyperledger/fabric-ca-server/tls-cert.pem
+          volumeMounts:
+            - mountPath: /scripts
+              name: my-pv-storage
+              subPath: files/scripts
+            - mountPath: /state
+              name: my-pv-storage
+              subPath: state
+            - mountPath: /files
+              name: my-pv-storage
+              subPath: files
+            - mountPath: /etc/hyperledger/fabric-ca-server
+              name: my-pv-storage
+              subPath: state/${NEW_ORG_NAME}-ca
+            - mountPath: /etc/hyperledger/fabric-ca-client
+              name: my-pv-storage
+              subPath: state/${NEW_ORG_NAME}-ca-client
+            - mountPath: /etc/hyperledger/fabric-ca/crypto-config
+              name: my-pv-storage
+              subPath: files/crypto-config
+EOT
+
+cat <<EOT > ${FOLDER_PATH}/cas/${NEW_ORG_NAME}-ca-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ${NEW_ORG_NAME}-ca
+  labels: {
+    component: ${NEW_ORG_NAME},
+    type: ca
+  }
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: ${NEW_ORG_NAME}
+      type: ca
+  template:
+    metadata:
+      labels:
+        component: ${NEW_ORG_NAME}
+        type: ca
+    spec:
+      volumes:
+        - name: my-pv-storage
+          persistentVolumeClaim:
+            claimName: my-pv-claim
+      containers:
+        - name: ${NEW_ORG_NAME}-ca
+          image: hyperledger/fabric-ca:1.4.7
+          command: ["sh"]
+          args: ["/scripts/start-root-ca.sh"]
+          ports:
+            - containerPort: 7054
+          env:
+            - name: FABRIC_CA_HOME
+              value: /etc/hyperledger/fabric-ca-server
+            - name: USERNAME
+              value: admin
+            - name: PASSWORD
+              value: adminpw
+            - name: CSR_HOSTS
+              value: ${NEW_ORG_NAME}-ca
+          volumeMounts:
+            - mountPath: /scripts
+              name: my-pv-storage
+              subPath: files/scripts
+            - mountPath: /etc/hyperledger/fabric-ca-server
+              name: my-pv-storage
+              subPath: state/${NEW_ORG_NAME}-ca
+
+EOT
+
+cat <<EOT > ${FOLDER_PATH}/cas/${NEW_ORG_NAME}-ca-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: ${NEW_ORG_NAME}-ca-service
+  labels: {
+    component: ${NEW_ORG_NAME},
+    type: ca
+  }
+spec:
+  type: ClusterIP
+  selector:
+    component: ${NEW_ORG_NAME}
+    type: ca
+  ports:
+    - port: 7054
+      targetPort: 7054
+
+EOT
+```
+
+Next, we need to update the private data
+```bash
+cat <<EOT > chaincode/resource_types/collections-config.json
+[
+    {
+        "name": "ibmResourceTypesPrivateData",
+        "policy": "OR('ibm.member')",
+        "requiredPeerCount": 1,
+        "maxPeerCount": 3,
+        "blockToLive": 0
+    },
+    {
+        "name": "oracleResourceTypesPrivateData",
+        "policy": "OR('oracle.member')",
+        "requiredPeerCount": 1,
+        "maxPeerCount": 3,
+        "blockToLive": 0
+    },
+    {
+        "name": "${NEW_ORG_NAME}ResourceTypesPrivateData",
+        "policy": "OR('${NEW_ORG_NAME}.member')",
+        "requiredPeerCount": 1,
+        "maxPeerCount": 3,
+        "blockToLive": 0
+    }
+]
+EOT
+
+cat <<EOT > chaincode/resources/collections-config.json
+[
+    {
+        "name": "ibmResourcesPrivateData",
+        "policy": "OR('ibm.member')",
+        "requiredPeerCount": 1,
+        "maxPeerCount": 3,
+        "blockToLive": 0
+    },
+    {
+        "name": "oracleResourcesPrivateData",
+        "policy": "OR('oracle.member')",
+        "requiredPeerCount": 1,
+        "maxPeerCount": 3,
+        "blockToLive": 0
+    },
+    {
+        "name": "${NEW_ORG_NAME}ResourcesPrivateData",
+        "policy": "OR('${NEW_ORG_NAME}.member')",
+        "requiredPeerCount": 1,
+        "maxPeerCount": 3,
+        "blockToLive": 0
+    }
+]
+EOT
 
 
 Start hp ca and create certs
@@ -35,7 +609,7 @@ kubectl exec -it $(kubectl get pods -o=name | grep example1 | sed "s/^.\{4\}//")
 ...
 cd /host/files
 
-bin/configtxgen -printOrg hp > ./channels/hp.json
+bin/configtxgen -printOrg dell > ./channels/dell.json
 ```
 
 Use an existing org to get the current config
