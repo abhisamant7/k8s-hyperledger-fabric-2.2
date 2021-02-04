@@ -614,13 +614,14 @@ bin/configtxgen -printOrg dell > ./channels/dell.json
 
 Use an existing org to get the current config
 ```bash
-kubectl exec -it $(kubectl get pods -o=name | grep cli-peer0-ibm-deployment | sed "s/^.\{4\}//") -- bash -c 'apk update'
-kubectl exec -it $(kubectl get pods -o=name | grep cli-peer0-ibm-deployment | sed "s/^.\{4\}//") -- bash -c 'apk add jq'
+kubectl exec -it $(kubectl get pods -o=name | grep cli-orderer0-deployment | sed "s/^.\{4\}//") -- bash -c 'apk update'
+kubectl exec -it $(kubectl get pods -o=name | grep cli-orderer0-deployment | sed "s/^.\{4\}//") -- bash -c 'apk add jq'
 sleep 1
-kubectl exec -it $(kubectl get pods -o=name | grep cli-peer0-ibm-deployment | sed "s/^.\{4\}//") -- bash -c 'peer channel fetch config sys_config_block.pb -c syschannel -o orderer0-service:7050 --tls --cafile=/etc/hyperledger/orderers/msp/tlscacerts/orderers-ca-service-7054.pem'
+
+kubectl exec -it $(kubectl get pods -o=name | grep cli-orderer0-deployment | sed "s/^.\{4\}//") -- bash -c 'peer channel fetch config sys_config_block.pb -c syschannel -o orderer0-service:7050 --tls --cafile=/var/hyperledger/orderer/msp/tlscacerts/tlsca.orderer-cert.pem'
 
 sleep 1
-kubectl exec -it $(kubectl get pods -o=name | grep cli-peer0-ibm-deployment | sed "s/^.\{4\}//") -- bash -c 'configtxlator proto_decode --input sys_config_block.pb --type common.Block | jq .data.data[0].payload.data.config > sys_config_block.json'
+kubectl exec -it $(kubectl get pods -o=name | grep cli-orderer0-deployment | sed "s/^.\{4\}//") -- bash -c 'configtxlator proto_decode --input sys_config_block.pb --type common.Block | jq .data.data[0].payload.data.config > sys_config_block.json'
 
 jq .data.data[0].payload.data.config sys_config_block.json > sys_config.json
 
@@ -629,23 +630,23 @@ sleep 1
 cat <<EOT > scripts/consum_modified_config.sh
 #!/bin/bash
 
-jq -s ‘.[0] * {“channel_group”:{“groups”:{“Consortiums”:{“groups”: {“MAIN”: {“groups”: {“hpMSP”:.[1]}}}}}}}’ config.json /hp.json >& consum_modified_config.json
+jq -s '.[0] * {"channel_group":{"groups":{"Consortiums":{"groups": {"MAIN": {"groups": {"dell":.[1]}}}}}}}’ sys_config_block.json ../dell.json >& consum_modified_config.json
 EOT
 
 chmod +x scripts/consum_modified_config.sh
 
-kubectl cp ./scripts $(kubectl get pods -o=name | grep cli-peer0-ibm-deployment | sed "s/^.\{4\}//"):/opt/gopath/src/github.com/hyperledger/fabric/peer
+kubectl cp ./scripts $(kubectl get pods -o=name | grep cli-orderer0-deployment | sed "s/^.\{4\}//"):/opt/gopath/src/github.com/hyperledger/fabric/orderer
 
-kubectl exec -it $(kubectl get pods -o=name | grep cli-peer0-ibm-deployment | sed "s/^.\{4\}//") -- bash -c './scripts/consum_modified_config.sh'
+kubectl exec -it $(kubectl get pods -o=name | grep cli-orderer0-deployment | sed "s/^.\{4\}//") -- bash -c './scripts/consum_modified_config.sh'
 sleep 1
 
-kubectl exec -it $(kubectl get pods -o=name | grep cli-peer0-ibm-deployment | sed "s/^.\{4\}//") -- bash -c 'configtxlator proto_encode --input sys_config.json --type common.Config --output sys_config.pb'
+kubectl exec -it $(kubectl get pods -o=name | grep cli-orderer0-deployment | sed "s/^.\{4\}//") -- bash -c 'configtxlator proto_encode --input sys_config.json --type common.Config --output sys_config.pb'
 
 sleep 1
-kubectl exec -it $(kubectl get pods -o=name | grep cli-peer0-ibm-deployment | sed "s/^.\{4\}//") -- bash -c 'configtxlator proto_encode --input consum_modified_config.json --type common.Config --output consum_modified_config.pb'
+kubectl exec -it $(kubectl get pods -o=name | grep cli-orderer0-deployment | sed "s/^.\{4\}//") -- bash -c 'configtxlator proto_encode --input consum_modified_config.json --type common.Config --output consum_modified_config.pb'
 sleep 1
 
-kubectl exec -it $(kubectl get pods -o=name | grep cli-peer0-ibm-deployment | sed "s/^.\{4\}//") -- bash -c '\
+kubectl exec -it $(kubectl get pods -o=name | grep cli-orderer0-deployment | sed "s/^.\{4\}//") -- bash -c '\
 	configtxlator compute_update \
 	--channel_id syschannel \
 	--original sys_config.pb \
@@ -653,7 +654,7 @@ kubectl exec -it $(kubectl get pods -o=name | grep cli-peer0-ibm-deployment | se
 	--output diff_config.pb'
 
 sleep 1
-kubectl exec -it $(kubectl get pods -o=name | grep cli-peer0-ibm-deployment | sed "s/^.\{4\}//") -- bash -c '\
+kubectl exec -it $(kubectl get pods -o=name | grep cli-orderer0-deployment | sed "s/^.\{4\}//") -- bash -c '\
 	configtxlator proto_decode \
 	--input diff_config.pb \
 	--type common.ConfigUpdate | jq . > diff_config.json \
@@ -661,24 +662,24 @@ kubectl exec -it $(kubectl get pods -o=name | grep cli-peer0-ibm-deployment | se
 cat <<EOT > scripts/create-org-envelope.sh
 #!/bin/bash
 
-‘{“payload”:{“header”:{“channel_header”:{“channel_id”:”mychannel”, “type”:2}},”data”:{“config_update”:’$(cat org_update.json)’}}}’ | jq . > diff_config_envelope.json
+'{"payload":{"header":{"channel_header":{"channel_id":"mychannel", "type":2}},"data":{"config_update":’$(cat org_update.json)’}}}’ | jq . > diff_config_envelope.json
 
 EOT
 
 sleep 1
-kubectl exec -it $(kubectl get pods -o=name | grep cli-peer0-ibm-deployment | sed "s/^.\{4\}//") -- bash -c './scripts/create-org-envelope.sh'
+kubectl exec -it $(kubectl get pods -o=name | grep cli-orderer0-deployment | sed "s/^.\{4\}//") -- bash -c './scripts/create-org-envelope.sh'
 sleep 1
 
 
-kubectl exec -it $(kubectl get pods -o=name | grep cli-peer0-ibm-deployment | sed "s/^.\{4\}//") -- bash -c '\
+kubectl exec -it $(kubectl get pods -o=name | grep cli-orderer0-deployment | sed "s/^.\{4\}//") -- bash -c '\
 	configtxlator proto_encode --input diff_config_envelope.json --type common.Envelope --output diff_config_envelope.pb \
 	'
 sleep 1
-kubectl exec -it $(kubectl get pods -o=name | grep cli-peer0-ibm-deployment | sed "s/^.\{4\}//") -- bash -c '\
+kubectl exec -it $(kubectl get pods -o=name | grep cli-orderer0-deployment | sed "s/^.\{4\}//") -- bash -c '\
 	peer channel signconfigtx -f diff_config_envelope.pb \
 	'
 sleep 1
-kubectl exec -it $(kubectl get pods -o=name | grep cli-peer0-ibm-deployment | sed "s/^.\{4\}//") -- bash -c '\
+kubectl exec -it $(kubectl get pods -o=name | grep cli-orderer0-deployment | sed "s/^.\{4\}//") -- bash -c '\
 	cp diff_config_envelope.pb channels/diff_config_envelope.pb \
 	'
 sleep 1
@@ -709,7 +710,7 @@ kubectl exec -it $(kubectl get pods -o=name | grep cli-peer1-hp-deployment | sed
 
 Time to install resource_types chaincode for the 3rd org: TODO: figure out how to get the current sequence number and use it for this new org
 ```bash
-kubectl exec -it $(kubectl get pods -o=name | grep cli-peer0-ibm-deployment | sed "s/^.\{4\}//") -- bash -c 'peer lifecycle chaincode package resource_types.tar.gz --path /opt/gopath/src/resource_types --lang golang --label resource_types_2'
+kubectl exec -it $(kubectl get pods -o=name | grep cli-orderer0-deployment | sed "s/^.\{4\}//") -- bash -c 'peer lifecycle chaincode package resource_types.tar.gz --path /opt/gopath/src/resource_types --lang golang --label resource_types_2'
 kubectl exec -it $(kubectl get pods -o=name | grep cli-peer1-ibm-deployment | sed "s/^.\{4\}//") -- bash -c 'peer lifecycle chaincode package resource_types.tar.gz --path /opt/gopath/src/resource_types --lang golang --label resource_types_2'
 kubectl exec -it $(kubectl get pods -o=name | grep cli-peer0-oracle-deployment | sed "s/^.\{4\}//") -- bash -c 'peer lifecycle chaincode package resource_types.tar.gz --path /opt/gopath/src/resource_types --lang golang --label resource_types_2'
 kubectl exec -it $(kubectl get pods -o=name | grep cli-peer1-oracle-deployment | sed "s/^.\{4\}//") -- bash -c 'peer lifecycle chaincode package resource_types.tar.gz --path /opt/gopath/src/resource_types --lang golang --label resource_types_2'
@@ -717,7 +718,7 @@ kubectl exec -it $(kubectl get pods -o=name | grep cli-peer0-hp-deployment | sed
 kubectl exec -it $(kubectl get pods -o=name | grep cli-peer1-hp-deployment | sed "s/^.\{4\}//") -- bash -c 'peer lifecycle chaincode package resource_types.tar.gz --path /opt/gopath/src/resource_types --lang golang --label resource_types_2'
 
 
-kubectl exec -it $(kubectl get pods -o=name | grep cli-peer0-ibm-deployment | sed "s/^.\{4\}//") -- bash -c 'peer lifecycle chaincode install resource_types.tar.gz &> pkg.txt'
+kubectl exec -it $(kubectl get pods -o=name | grep cli-orderer0-deployment | sed "s/^.\{4\}//") -- bash -c 'peer lifecycle chaincode install resource_types.tar.gz &> pkg.txt'
 kubectl exec -it $(kubectl get pods -o=name | grep cli-peer1-ibm-deployment | sed "s/^.\{4\}//") -- bash -c 'peer lifecycle chaincode install resource_types.tar.gz'
 kubectl exec -it $(kubectl get pods -o=name | grep cli-peer0-oracle-deployment | sed "s/^.\{4\}//") -- bash -c 'peer lifecycle chaincode install resource_types.tar.gz &> pkg.txt'
 kubectl exec -it $(kubectl get pods -o=name | grep cli-peer1-oracle-deployment | sed "s/^.\{4\}//") -- bash -c 'peer lifecycle chaincode install resource_types.tar.gz'
@@ -725,23 +726,23 @@ kubectl exec -it $(kubectl get pods -o=name | grep cli-peer0-hp-deployment | sed
 kubectl exec -it $(kubectl get pods -o=name | grep cli-peer1-hp-deployment | sed "s/^.\{4\}//") -- bash -c 'peer lifecycle chaincode install resource_types.tar.gz'
 
 
-kubectl exec -it $(kubectl get pods -o=name | grep cli-peer0-ibm-deployment | sed "s/^.\{4\}//") -- bash -c 'peer lifecycle chaincode approveformyorg -o orderer0-service:7050 --tls --cafile=/etc/hyperledger/orderers/msp/tlscacerts/orderers-ca-service-7054.pem --collections-config /opt/gopath/src/resource_types/collections-config.json --channelID mainchannel --name resource_types --version 2.0 --sequence 2 --package-id $(tail -n 1 pkg.txt | awk '\''NF>1{print $NF}'\'')'
+kubectl exec -it $(kubectl get pods -o=name | grep cli-orderer0-deployment | sed "s/^.\{4\}//") -- bash -c 'peer lifecycle chaincode approveformyorg -o orderer0-service:7050 --tls --cafile=/etc/hyperledger/orderers/msp/tlscacerts/orderers-ca-service-7054.pem --collections-config /opt/gopath/src/resource_types/collections-config.json --channelID mainchannel --name resource_types --version 2.0 --sequence 2 --package-id $(tail -n 1 pkg.txt | awk '\''NF>1{print $NF}'\'')'
 kubectl exec -it $(kubectl get pods -o=name | grep cli-peer0-oracle-deployment | sed "s/^.\{4\}//") -- bash -c 'peer lifecycle chaincode approveformyorg -o orderer0-service:7050 --tls --cafile=/etc/hyperledger/orderers/msp/tlscacerts/orderers-ca-service-7054.pem --collections-config /opt/gopath/src/resource_types/collections-config.json --channelID mainchannel --name resource_types --version 2.0 --sequence 2 --package-id $(tail -n 1 pkg.txt | awk '\''NF>1{print $NF}'\'')'
 kubectl exec -it $(kubectl get pods -o=name | grep cli-peer0-hp-deployment | sed "s/^.\{4\}//") -- bash -c 'peer lifecycle chaincode approveformyorg -o orderer0-service:7050 --tls --cafile=/etc/hyperledger/orderers/msp/tlscacerts/orderers-ca-service-7054.pem --collections-config /opt/gopath/src/resource_types/collections-config.json --channelID mainchannel --name resource_types --version 2.0 --sequence 2 --package-id $(tail -n 1 pkg.txt | awk '\''NF>1{print $NF}'\'')'
 
-kubectl exec -it $(kubectl get pods -o=name | grep cli-peer0-ibm-deployment | sed "s/^.\{4\}//") -- bash -c 'peer lifecycle chaincode commit -o orderer0-service:7050 --tls --cafile=/etc/hyperledger/orderers/msp/tlscacerts/orderers-ca-service-7054.pem --collections-config /opt/gopath/src/resource_types/collections-config.json --channelID mainchannel --name resource_types --version 2.0 --sequence 2'
+kubectl exec -it $(kubectl get pods -o=name | grep cli-orderer0-deployment | sed "s/^.\{4\}//") -- bash -c 'peer lifecycle chaincode commit -o orderer0-service:7050 --tls --cafile=/etc/hyperledger/orderers/msp/tlscacerts/orderers-ca-service-7054.pem --collections-config /opt/gopath/src/resource_types/collections-config.json --channelID mainchannel --name resource_types --version 2.0 --sequence 2'
 ```
 
 Lets test this chaincode
 ```bash
-kubectl exec -it $(kubectl get pods -o=name | grep cli-peer0-ibm-deployment | sed "s/^.\{4\}//") -- bash -c 'peer chaincode query -C mainchannel -n resource_types -c '\''{"Args":["Index"]}'\'' -o orderer0-service:7050 --tls --cafile=/etc/hyperledger/orderers/msp/tlscacerts/orderers-ca-service-7054.pem'
+kubectl exec -it $(kubectl get pods -o=name | grep cli-orderer0-deployment | sed "s/^.\{4\}//") -- bash -c 'peer chaincode query -C mainchannel -n resource_types -c '\''{"Args":["Index"]}'\'' -o orderer0-service:7050 --tls --cafile=/etc/hyperledger/orderers/msp/tlscacerts/orderers-ca-service-7054.pem'
 kubectl exec -it $(kubectl get pods -o=name | grep cli-peer0-oracle-deployment | sed "s/^.\{4\}//") -- bash -c 'peer chaincode query -C mainchannel -n resource_types -c '\''{"Args":["Index"]}'\'' -o orderer0-service:7050 --tls --cafile=/etc/hyperledger/orderers/msp/tlscacerts/orderers-ca-service-7054.pem'
 kubectl exec -it $(kubectl get pods -o=name | grep cli-peer0-hp-deployment | sed "s/^.\{4\}//") -- bash -c 'peer chaincode query -C mainchannel -n resource_types -c '\''{"Args":["Index"]}'\'' -o orderer0-service:7050 --tls --cafile=/etc/hyperledger/orderers/msp/tlscacerts/orderers-ca-service-7054.pem'
 ```
 
 Time to install resources chaincode for the 3rd org (Need to use the NEXT seq number)
 ```bash
-kubectl exec -it $(kubectl get pods -o=name | grep cli-peer0-ibm-deployment | sed "s/^.\{4\}//") -- bash -c 'peer lifecycle chaincode package resources.tar.gz --path /opt/gopath/src/resources --lang golang --label resources_2'
+kubectl exec -it $(kubectl get pods -o=name | grep cli-orderer0-deployment | sed "s/^.\{4\}//") -- bash -c 'peer lifecycle chaincode package resources.tar.gz --path /opt/gopath/src/resources --lang golang --label resources_2'
 kubectl exec -it $(kubectl get pods -o=name | grep cli-peer1-ibm-deployment | sed "s/^.\{4\}//") -- bash -c 'peer lifecycle chaincode package resources.tar.gz --path /opt/gopath/src/resources --lang golang --label resources_2'
 kubectl exec -it $(kubectl get pods -o=name | grep cli-peer0-oracle-deployment | sed "s/^.\{4\}//") -- bash -c 'peer lifecycle chaincode package resources.tar.gz --path /opt/gopath/src/resources --lang golang --label resources_2'
 kubectl exec -it $(kubectl get pods -o=name | grep cli-peer1-oracle-deployment | sed "s/^.\{4\}//") -- bash -c 'peer lifecycle chaincode package resources.tar.gz --path /opt/gopath/src/resources --lang golang --label resources_2'
@@ -749,7 +750,7 @@ kubectl exec -it $(kubectl get pods -o=name | grep cli-peer0-hp-deployment | sed
 kubectl exec -it $(kubectl get pods -o=name | grep cli-peer1-hp-deployment | sed "s/^.\{4\}//") -- bash -c 'peer lifecycle chaincode package resources.tar.gz --path /opt/gopath/src/resources --lang golang --label resources_2'
 
 
-kubectl exec -it $(kubectl get pods -o=name | grep cli-peer0-ibm-deployment | sed "s/^.\{4\}//") -- bash -c 'peer lifecycle chaincode install resources.tar.gz &> pkg.txt'
+kubectl exec -it $(kubectl get pods -o=name | grep cli-orderer0-deployment | sed "s/^.\{4\}//") -- bash -c 'peer lifecycle chaincode install resources.tar.gz &> pkg.txt'
 kubectl exec -it $(kubectl get pods -o=name | grep cli-peer1-ibm-deployment | sed "s/^.\{4\}//") -- bash -c 'peer lifecycle chaincode install resources.tar.gz'
 kubectl exec -it $(kubectl get pods -o=name | grep cli-peer0-oracle-deployment | sed "s/^.\{4\}//") -- bash -c 'peer lifecycle chaincode install resources.tar.gz &> pkg.txt'
 kubectl exec -it $(kubectl get pods -o=name | grep cli-peer1-oracle-deployment | sed "s/^.\{4\}//") -- bash -c 'peer lifecycle chaincode install resources.tar.gz'
@@ -757,13 +758,13 @@ kubectl exec -it $(kubectl get pods -o=name | grep cli-peer0-hp-deployment | sed
 kubectl exec -it $(kubectl get pods -o=name | grep cli-peer1-hp-deployment | sed "s/^.\{4\}//") -- bash -c 'peer lifecycle chaincode install resources.tar.gz'
 
 
-kubectl exec -it $(kubectl get pods -o=name | grep cli-peer0-ibm-deployment | sed "s/^.\{4\}//") -- bash -c 'peer lifecycle chaincode approveformyorg -o orderer0-service:7050 --tls --cafile=/etc/hyperledger/orderers/msp/tlscacerts/orderers-ca-service-7054.pem --collections-config /opt/gopath/src/resources/collections-config.json --channelID mainchannel --name resources --version 2.0 --sequence 2 --package-id $(tail -n 1 pkg.txt | awk '\''NF>1{print $NF}'\'')'
+kubectl exec -it $(kubectl get pods -o=name | grep cli-orderer0-deployment | sed "s/^.\{4\}//") -- bash -c 'peer lifecycle chaincode approveformyorg -o orderer0-service:7050 --tls --cafile=/etc/hyperledger/orderers/msp/tlscacerts/orderers-ca-service-7054.pem --collections-config /opt/gopath/src/resources/collections-config.json --channelID mainchannel --name resources --version 2.0 --sequence 2 --package-id $(tail -n 1 pkg.txt | awk '\''NF>1{print $NF}'\'')'
 kubectl exec -it $(kubectl get pods -o=name | grep cli-peer0-oracle-deployment | sed "s/^.\{4\}//") -- bash -c 'peer lifecycle chaincode approveformyorg -o orderer0-service:7050 --tls --cafile=/etc/hyperledger/orderers/msp/tlscacerts/orderers-ca-service-7054.pem --collections-config /opt/gopath/src/resources/collections-config.json --channelID mainchannel --name resources --version 2.0 --sequence 2 --package-id $(tail -n 1 pkg.txt | awk '\''NF>1{print $NF}'\'')'
 kubectl exec -it $(kubectl get pods -o=name | grep cli-peer0-hp-deployment | sed "s/^.\{4\}//") -- bash -c 'peer lifecycle chaincode approveformyorg -o orderer0-service:7050 --tls --cafile=/etc/hyperledger/orderers/msp/tlscacerts/orderers-ca-service-7054.pem --collections-config /opt/gopath/src/resources/collections-config.json --channelID mainchannel --name resources --version 2.0 --sequence 2 --package-id $(tail -n 1 pkg.txt | awk '\''NF>1{print $NF}'\'')'
 
 
 
-kubectl exec -it $(kubectl get pods -o=name | grep cli-peer0-ibm-deployment | sed "s/^.\{4\}//") -- bash -c 'peer lifecycle chaincode commit -o orderer0-service:7050 --tls --cafile=/etc/hyperledger/orderers/msp/tlscacerts/orderers-ca-service-7054.pem --collections-config /opt/gopath/src/resources/collections-config.json --channelID mainchannel --name resources --version 2.0 --sequence 2'
+kubectl exec -it $(kubectl get pods -o=name | grep cli-orderer0-deployment | sed "s/^.\{4\}//") -- bash -c 'peer lifecycle chaincode commit -o orderer0-service:7050 --tls --cafile=/etc/hyperledger/orderers/msp/tlscacerts/orderers-ca-service-7054.pem --collections-config /opt/gopath/src/resources/collections-config.json --channelID mainchannel --name resources --version 2.0 --sequence 2'
 ```
 
 Lets test this chaincode
@@ -771,7 +772,7 @@ Lets test this chaincode
 kubectl exec -it $(kubectl get pods -o=name | grep cli-peer0-hp-deployment | sed "s/^.\{4\}//") -- bash -c 'peer chaincode invoke -C mainchannel -n resources -c '\''{"Args":["Create","PCs","1"]}'\'' -o orderer0-service:7050 --tls --cafile=/etc/hyperledger/orderers/msp/tlscacerts/orderers-ca-service-7054.pem'
 kubectl exec -it $(kubectl get pods -o=name | grep cli-peer0-hp-deployment | sed "s/^.\{4\}//") -- bash -c 'peer chaincode invoke -C mainchannel -n resources -c '\''{"Args":["Create","Printers","1"]}'\'' -o orderer0-service:7050 --tls --cafile=/etc/hyperledger/orderers/msp/tlscacerts/orderers-ca-service-7054.pem'
 sleep 5
-kubectl exec -it $(kubectl get pods -o=name | grep cli-peer0-ibm-deployment | sed "s/^.\{4\}//") -- bash -c 'peer chaincode query -C mainchannel -n resources -c '\''{"Args":["Index"]}'\'' -o orderer0-service:7050 --tls --cafile=/etc/hyperledger/orderers/msp/tlscacerts/orderers-ca-service-7054.pem'
+kubectl exec -it $(kubectl get pods -o=name | grep cli-orderer0-deployment | sed "s/^.\{4\}//") -- bash -c 'peer chaincode query -C mainchannel -n resources -c '\''{"Args":["Index"]}'\'' -o orderer0-service:7050 --tls --cafile=/etc/hyperledger/orderers/msp/tlscacerts/orderers-ca-service-7054.pem'
 kubectl exec -it $(kubectl get pods -o=name | grep cli-peer0-oracle-deployment | sed "s/^.\{4\}//") -- bash -c 'peer chaincode query -C mainchannel -n resources -c '\''{"Args":["Index"]}'\'' -o orderer0-service:7050 --tls --cafile=/etc/hyperledger/orderers/msp/tlscacerts/orderers-ca-service-7054.pem'
 kubectl exec -it $(kubectl get pods -o=name | grep cli-peer0-hp-deployment | sed "s/^.\{4\}//") -- bash -c 'peer chaincode query -C mainchannel -n resources -c '\''{"Args":["Index"]}'\'' -o orderer0-service:7050 --tls --cafile=/etc/hyperledger/orderers/msp/tlscacerts/orderers-ca-service-7054.pem'
 ```
