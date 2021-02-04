@@ -625,12 +625,13 @@ kubectl exec -it $(kubectl get pods -o=name | grep cli-orderer0-deployment | sed
 
 jq .data.data[0].payload.data.config sys_config_block.json > sys_config.json
 
+echo jq -s '.[0] * {"channel_group":{"groups":{"Consortiums":{"groups": {"DellConsortium": {"groups": {"dell":.[1]}, "mod_policy": "/Channel/Orderer/Admins", "policies": {}, "values": {"ChannelCreationPolicy": {"mod_policy": "/Channel/Orderer/Admins","value": {"type": 3,"value": {"rule": "ANY","sub_policy": "Admins"}},"version": "0"}},"version": "0"}}}}}}' sys_config_block.json ./dell.json> consum_modified_config.json
 
 sleep 1
 cat <<EOT > scripts/consum_modified_config.sh
 #!/bin/bash
 
-jq -s '.[0] * {"channel_group":{"groups":{"Consortiums":{"groups": {"MAIN": {"groups": {"dell":.[1]}}}}}}}’ sys_config_block.json ../dell.json >& consum_modified_config.json
+jq -s '.[0] * {"channel_group":{"groups":{"Consortiums":{"groups": {"MAIN": {"groups": {"dell":.[1]}}}}}}}' sys_config_block.json ./dell.json >& consum_modified_config.json
 EOT
 
 chmod +x scripts/consum_modified_config.sh
@@ -640,11 +641,14 @@ kubectl cp ./scripts $(kubectl get pods -o=name | grep cli-orderer0-deployment |
 kubectl exec -it $(kubectl get pods -o=name | grep cli-orderer0-deployment | sed "s/^.\{4\}//") -- bash -c './scripts/consum_modified_config.sh'
 sleep 1
 
-kubectl exec -it $(kubectl get pods -o=name | grep cli-orderer0-deployment | sed "s/^.\{4\}//") -- bash -c 'configtxlator proto_encode --input sys_config.json --type common.Config --output sys_config.pb'
+kubectl exec -it $(kubectl get pods -o=name | grep cli-orderer0-deployment | sed "s/^.\{4\}//") -- bash -c 'configtxlator proto_encode --input sys_config_block.json --type common.Config --output sys_config.pb'
 
 sleep 1
 kubectl exec -it $(kubectl get pods -o=name | grep cli-orderer0-deployment | sed "s/^.\{4\}//") -- bash -c 'configtxlator proto_encode --input consum_modified_config.json --type common.Config --output consum_modified_config.pb'
 sleep 1
+
+kubectl exec -it $(kubectl get pods -o=name | grep cli-orderer0-deployment | sed "s/^.\{4\}//") -- bash -c 'configtxlator compute_update --channel_id syschannel --original ./crypto/sys_config.pb --updated ./crypto/modified_config.pb --output dell_update.pb'
+
 
 kubectl exec -it $(kubectl get pods -o=name | grep cli-orderer0-deployment | sed "s/^.\{4\}//") -- bash -c '\
 	configtxlator compute_update \
@@ -657,35 +661,26 @@ sleep 1
 kubectl exec -it $(kubectl get pods -o=name | grep cli-orderer0-deployment | sed "s/^.\{4\}//") -- bash -c '\
 	configtxlator proto_decode \
 	--input diff_config.pb \
-	--type common.ConfigUpdate | jq . > diff_config.json \
-	'
-cat <<EOT > scripts/create-org-envelope.sh
-#!/bin/bash
+	--type common.ConfigUpdate | jq . > diff_config.json'
 
-'{"payload":{"header":{"channel_header":{"channel_id":"mychannel", "type":2}},"data":{"config_update":’$(cat org_update.json)’}}}’ | jq . > diff_config_envelope.json
-
-EOT
-
-sleep 1
-kubectl exec -it $(kubectl get pods -o=name | grep cli-orderer0-deployment | sed "s/^.\{4\}//") -- bash -c './scripts/create-org-envelope.sh'
-sleep 1
+echo '{"payload":{"header":{"channel_header":{"channel_id":"syschannel", "type":2}},"data":{"config_update":'$(cat diff_config.json)'}}}' | jq . > diff_config_envelope.json
 
 
-kubectl exec -it $(kubectl get pods -o=name | grep cli-orderer0-deployment | sed "s/^.\{4\}//") -- bash -c '\
-	configtxlator proto_encode --input diff_config_envelope.json --type common.Envelope --output diff_config_envelope.pb \
-	'
+kubectl exec -it $(kubectl get pods -o=name | grep cli-orderer0-deployment | sed "s/^.\{4\}//") -- bash -c '
+	configtxlator proto_encode --input diff_config_envelope.json --type common.Envelope --output diff_config_envelope.pb'
 sleep 1
 kubectl exec -it $(kubectl get pods -o=name | grep cli-orderer0-deployment | sed "s/^.\{4\}//") -- bash -c '\
-	peer channel signconfigtx -f diff_config_envelope.pb \
-	'
+	peer channel signconfigtx -f diff_config_envelope.pb'
+
+
+kubectl exec -it $(kubectl get pods -o=name | grep cli-orderer0-deployment | sed "s/^.\{4\}//") -- bash -c '\ peer channel update -f diff_config_envelope.pb  -c syschannel -o orderer0-service:7050 --tls --cafile=/var/hyperledger/orderer/msp/tlscacerts/tlsca.orderer-cert.pem'
+
+
+  kubectl exec -it $(kubectl get pods -o=name | grep cli-orderer0-deployment | sed "s/^.\{4\}//") -- bash -c '\
+	peer channel signconfigtx -f diff_config_envelope.pb  -o orderer0-service:7050 --tls --cafile=/etc/hyperledger/orderers/msp/tlscacerts/orderers-ca-service-7054.pem'
 sleep 1
 kubectl exec -it $(kubectl get pods -o=name | grep cli-orderer0-deployment | sed "s/^.\{4\}//") -- bash -c '\
 	cp diff_config_envelope.pb channels/diff_config_envelope.pb \
-	'
-sleep 1
-
-kubectl exec -it $(kubectl get pods -o=name | grep cli-peer0-oracle-deployment | sed "s/^.\{4\}//") -- bash -c '\
-	peer channel update -f channels/diff_config_envelope.pb -c syschannel -o orderer0-service:7050 --tls --cafile=/etc/hyperledger/orderers/msp/tlscacerts/orderers-ca-service-7054.pem \
 	'
 
 ```

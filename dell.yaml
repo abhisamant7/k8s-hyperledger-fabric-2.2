@@ -1,0 +1,21 @@
+Organizations:
+    - &dell
+        Name: dell
+        ID: dell
+        MSPDir: crypto-config/peerOrganizations/dell/msp
+        AnchorPeers:
+            - Host: peer0-dell-service
+              Port: 7051
+        Policies:
+            Readers:
+                Type: Signature
+                Rule: "OR('dell.member')"
+            Writers:
+                Type: Signature
+                Rule: "OR('dell.member')"
+            Admins:
+                Type: Signature
+                Rule: "OR('dell.admin')"
+            Endorsement:
+                Type: Signature
+                Rule: "OR('dell.member')"

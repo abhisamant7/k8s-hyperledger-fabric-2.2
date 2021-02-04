@@ -1,0 +1,248 @@
+{
+  "payload": {
+    "header": {
+      "channel_header": {
+        "channel_id": "syschannel",
+        "type": 2
+      }
+    },
+    "data": {
+      "config_update": {
+        "channel_id": "syschannel",
+        "isolated_data": {},
+        "read_set": {
+          "groups": {
+            "Consortiums": {
+              "groups": {
+                "MAIN": {
+                  "groups": {},
+                  "mod_policy": "",
+                  "policies": {},
+                  "values": {},
+                  "version": "0"
+                }
+              },
+              "mod_policy": "",
+              "policies": {
+                "Admins": {
+                  "mod_policy": "",
+                  "policy": null,
+                  "version": "0"
+                }
+              },
+              "values": {},
+              "version": "0"
+            }
+          },
+          "mod_policy": "",
+          "policies": {},
+          "values": {},
+          "version": "0"
+        },
+        "write_set": {
+          "groups": {
+            "Consortiums": {
+              "groups": {
+                "DellConsortium": {
+                  "groups": {
+                    "dell": {
+                      "groups": {},
+                      "mod_policy": "Admins",
+                      "policies": {
+                        "Admins": {
+                          "mod_policy": "Admins",
+                          "policy": {
+                            "type": 1,
+                            "value": {
+                              "identities": [
+                                {
+                                  "principal": {
+                                    "msp_identifier": "dell",
+                                    "role": "ADMIN"
+                                  },
+                                  "principal_classification": "ROLE"
+                                }
+                              ],
+                              "rule": {
+                                "n_out_of": {
+                                  "n": 1,
+                                  "rules": [
+                                    {
+                                      "signed_by": 0
+                                    }
+                                  ]
+                                }
+                              },
+                              "version": 0
+                            }
+                          },
+                          "version": "0"
+                        },
+                        "Endorsement": {
+                          "mod_policy": "Admins",
+                          "policy": {
+                            "type": 1,
+                            "value": {
+                              "identities": [
+                                {
+                                  "principal": {
+                                    "msp_identifier": "dell",
+                                    "role": "MEMBER"
+                                  },
+                                  "principal_classification": "ROLE"
+                                }
+                              ],
+                              "rule": {
+                                "n_out_of": {
+                                  "n": 1,
+                                  "rules": [
+                                    {
+                                      "signed_by": 0
+                                    }
+                                  ]
+                                }
+                              },
+                              "version": 0
+                            }
+                          },
+                          "version": "0"
+                        },
+                        "Readers": {
+                          "mod_policy": "Admins",
+                          "policy": {
+                            "type": 1,
+                            "value": {
+                              "identities": [
+                                {
+                                  "principal": {
+                                    "msp_identifier": "dell",
+                                    "role": "MEMBER"
+                                  },
+                                  "principal_classification": "ROLE"
+                                }
+                              ],
+                              "rule": {
+                                "n_out_of": {
+                                  "n": 1,
+                                  "rules": [
+                                    {
+                                      "signed_by": 0
+                                    }
+                                  ]
+                                }
+                              },
+                              "version": 0
+                            }
+                          },
+                          "version": "0"
+                        },
+                        "Writers": {
+                          "mod_policy": "Admins",
+                          "policy": {
+                            "type": 1,
+                            "value": {
+                              "identities": [
+                                {
+                                  "principal": {
+                                    "msp_identifier": "dell",
+                                    "role": "MEMBER"
+                                  },
+                                  "principal_classification": "ROLE"
+                                }
+                              ],
+                              "rule": {
+                                "n_out_of": {
+                                  "n": 1,
+                                  "rules": [
+                                    {
+                                      "signed_by": 0
+                                    }
+                                  ]
+                                }
+                              },
+                              "version": 0
+                            }
+                          },
+                          "version": "0"
+                        }
+                      },
+                      "values": {
+                        "MSP": {
+                          "mod_policy": "Admins",
+                          "value": {
+                            "config": {
+                              "admins": [
+                                "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUN1ekNDQW1LZ0F3SUJBZ0lVQUxmUGRrWkhhMWNHUDkrbUd2WnZ2RmNFV3Vnd0NnWUlLb1pJemowRUF3SXcKYURFTE1Ba0dBMVVFQmhNQ1ZWTXhGekFWQmdOVkJBZ1REazV2Y25Sb0lFTmhjbTlzYVc1aE1SUXdFZ1lEVlFRSwpFd3RJZVhCbGNteGxaR2RsY2pFUE1BMEdBMVVFQ3hNR1JtRmljbWxqTVJrd0Z3WURWUVFERXhCbVlXSnlhV010ClkyRXRjMlZ5ZG1WeU1CNFhEVEl4TURJd05EQTBORFF3TUZvWERUSXlNREl3TkRBME5Ea3dNRm93YVRFTE1Ba0cKQTFVRUJoTUNWVk14RnpBVkJnTlZCQWdURGs1dmNuUm9JRU5oY205c2FXNWhNUlF3RWdZRFZRUUtFd3RJZVhCbApjbXhsWkdkbGNqRWJNQXdHQTFVRUN4TUZZV1J0YVc0d0N3WURWUVFMRXdSdmNtY3hNUTR3REFZRFZRUURFd1ZCClpHMXBiakJaTUJNR0J5cUdTTTQ5QWdFR0NDcUdTTTQ5QXdFSEEwSUFCSjFjQUdFSjdqMkdDREVDNkM2Z2w4WkMKUVp6NDVJV3IzcWdsdUxVZUNsWXAzUzQ5ZUthekovcytTV0t2NVVvbkZrTEpJNEZTZXFDdkFvbVhlQzdyRnVhagpnZWd3Z2VVd0RnWURWUjBQQVFIL0JBUURBZ2VBTUF3R0ExVWRFd0VCL3dRQ01BQXdIUVlEVlIwT0JCWUVGUEhWCi9RMFUyVGFGcEptR3Q3NnRuUUhEZXZ3dE1COEdBMVVkSXdRWU1CYUFGRzNzQnVRV044MkFrM3ZMblI5WVJCMWUKcWZVMU1DZ0dBMVVkRVFRaE1CK0NIV1JsYkd3dFkyRXRZMnhwWlc1MExXWTJOelk1WW1JM0xUWTRiREk0TUZzRwpDQ29EQkFVR0J3Z0JCRTk3SW1GMGRISnpJanA3SW1obUxrRm1abWxzYVdGMGFXOXVJam9pYjNKbk1TSXNJbWhtCkxrVnVjbTlzYkcxbGJuUkpSQ0k2SWtGa2JXbHVJaXdpYUdZdVZIbHdaU0k2SW1Ga2JXbHVJbjE5TUFvR0NDcUcKU000OUJBTUNBMGNBTUVRQ0lHaUFVMzZtZGs0aXFRNHpSbTdVNTBkMEVVTmJNaGNTRkFjTWpxUUlZa3FQQWlCVAptUldLVWxwNUZ5SEJCeUdSTXozaWFJRWNxV0p6bUpLdW1Zbm5lUjhNSGc9PQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg=="
+                              ],
+                              "crypto_config": {
+                                "identity_identifier_hash_function": "SHA256",
+                                "signature_hash_family": "SHA2"
+                              },
+                              "fabric_node_ous": null,
+                              "intermediate_certs": [],
+                              "name": "dell",
+                              "organizational_unit_identifiers": [],
+                              "revocation_list": [],
+                              "root_certs": [
+                                "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUNGakNDQWIyZ0F3SUJBZ0lVU09jbm9hdkJCL2lRb0lJUko0UFpvMnh4TURRd0NnWUlLb1pJemowRUF3SXcKYURFTE1Ba0dBMVVFQmhNQ1ZWTXhGekFWQmdOVkJBZ1REazV2Y25Sb0lFTmhjbTlzYVc1aE1SUXdFZ1lEVlFRSwpFd3RJZVhCbGNteGxaR2RsY2pFUE1BMEdBMVVFQ3hNR1JtRmljbWxqTVJrd0Z3WURWUVFERXhCbVlXSnlhV010ClkyRXRjMlZ5ZG1WeU1CNFhEVEl4TURJd05EQTBORE13TUZvWERUTTJNREl3TVRBME5ETXdNRm93YURFTE1Ba0cKQTFVRUJoTUNWVk14RnpBVkJnTlZCQWdURGs1dmNuUm9JRU5oY205c2FXNWhNUlF3RWdZRFZRUUtFd3RJZVhCbApjbXhsWkdkbGNqRVBNQTBHQTFVRUN4TUdSbUZpY21sak1Sa3dGd1lEVlFRREV4Qm1ZV0p5YVdNdFkyRXRjMlZ5CmRtVnlNRmt3RXdZSEtvWkl6ajBDQVFZSUtvWkl6ajBEQVFjRFFnQUVZMTU1U2l6MmgycExaancyMEloMFh0S0QKdDZ1R2VGN21sQWFvTDZ1RVJjSUVZaUR3OVNyNFBYbEJhUWNmV1VFMTRCTnFyemkrY3RUNndwSlVWc1U4UTZORgpNRU13RGdZRFZSMFBBUUgvQkFRREFnRUdNQklHQTFVZEV3RUIvd1FJTUFZQkFmOENBUUV3SFFZRFZSME9CQllFCkZHM3NCdVFXTjgyQWszdkxuUjlZUkIxZXFmVTFNQW9HQ0NxR1NNNDlCQU1DQTBjQU1FUUNJQld2U1dWQ3B5d3cKb09ObFRxRHgxYmZCY1hoMG9OaTFIc3I3dUFqQjNibHFBaUJmVFY3ZzlZRVRRQ0hvQTY4OGRMOURkdnE3ZkRRcgpkc1h6OGx0U2hqUHNIdz09Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K"
+                              ],
+                              "signing_identity": null,
+                              "tls_intermediate_certs": [],
+                              "tls_root_certs": [
+                                "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUNGakNDQWIyZ0F3SUJBZ0lVU09jbm9hdkJCL2lRb0lJUko0UFpvMnh4TURRd0NnWUlLb1pJemowRUF3SXcKYURFTE1Ba0dBMVVFQmhNQ1ZWTXhGekFWQmdOVkJBZ1REazV2Y25Sb0lFTmhjbTlzYVc1aE1SUXdFZ1lEVlFRSwpFd3RJZVhCbGNteGxaR2RsY2pFUE1BMEdBMVVFQ3hNR1JtRmljbWxqTVJrd0Z3WURWUVFERXhCbVlXSnlhV010ClkyRXRjMlZ5ZG1WeU1CNFhEVEl4TURJd05EQTBORE13TUZvWERUTTJNREl3TVRBME5ETXdNRm93YURFTE1Ba0cKQTFVRUJoTUNWVk14RnpBVkJnTlZCQWdURGs1dmNuUm9JRU5oY205c2FXNWhNUlF3RWdZRFZRUUtFd3RJZVhCbApjbXhsWkdkbGNqRVBNQTBHQTFVRUN4TUdSbUZpY21sak1Sa3dGd1lEVlFRREV4Qm1ZV0p5YVdNdFkyRXRjMlZ5CmRtVnlNRmt3RXdZSEtvWkl6ajBDQVFZSUtvWkl6ajBEQVFjRFFnQUVZMTU1U2l6MmgycExaancyMEloMFh0S0QKdDZ1R2VGN21sQWFvTDZ1RVJjSUVZaUR3OVNyNFBYbEJhUWNmV1VFMTRCTnFyemkrY3RUNndwSlVWc1U4UTZORgpNRU13RGdZRFZSMFBBUUgvQkFRREFnRUdNQklHQTFVZEV3RUIvd1FJTUFZQkFmOENBUUV3SFFZRFZSME9CQllFCkZHM3NCdVFXTjgyQWszdkxuUjlZUkIxZXFmVTFNQW9HQ0NxR1NNNDlCQU1DQTBjQU1FUUNJQld2U1dWQ3B5d3cKb09ObFRxRHgxYmZCY1hoMG9OaTFIc3I3dUFqQjNibHFBaUJmVFY3ZzlZRVRRQ0hvQTY4OGRMOURkdnE3ZkRRcgpkc1h6OGx0U2hqUHNIdz09Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K"
+                              ]
+                            },
+                            "type": 0
+                          },
+                          "version": "0"
+                        }
+                      },
+                      "version": "0"
+                    }
+                  },
+                  "mod_policy": "/Channel/Orderer/Admins",
+                  "policies": {},
+                  "values": {
+                    "ChannelCreationPolicy": {
+                      "mod_policy": "/Channel/Orderer/Admins",
+                      "value": {
+                        "type": 3,
+                        "value": {
+                          "rule": "ANY",
+                          "sub_policy": "Admins"
+                        }
+                      },
+                      "version": "0"
+                    }
+                  },
+                  "version": "0"
+                },
+                "MAIN": {
+                  "groups": {},
+                  "mod_policy": "",
+                  "policies": {},
+                  "values": {},
+                  "version": "0"
+                }
+              },
+              "mod_policy": "/Channel/Orderer/Admins",
+              "policies": {
+                "Admins": {
+                  "mod_policy": "",
+                  "policy": null,
+                  "version": "0"
+                }
+              },
+              "values": {},
+              "version": "1"
+            }
+          },
+          "mod_policy": "",
+          "policies": {},
+          "values": {},
+          "version": "0"
+        }
+      }
+    }
+  }
+}
