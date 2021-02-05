@@ -39,7 +39,7 @@ client:
 
 channels:
 
-  hpchannel:
+  dellchannel:
 
     peers:
       peer0-ibm:
@@ -65,12 +65,12 @@ organizations:
     peers:
       - peer0-ibm
       - peer1-ibm
-  hp:
-    mspid: hp
-    cryptopath: peerOrganizations/hp/users/Admin@hp/msp
+  dell:
+    mspid: dell
+    cryptopath: peerOrganizations/dell/users/Admin@dell/msp
     peers:
-      - peer0-hp
-      - peer1-hp
+      - peer0-dell
+      - peer1-dell
 
 orderers:
   _default:
@@ -134,21 +134,21 @@ peers:
       path: /home/nick/Projects/k8s-hyperledger-fabric-2.2/crypto-config/peerOrganizations/ibm/msp/tlscacerts/ibm-ca-7054.pem
 
 
-  peer0-hp:
+  peer0-dell:
     grpcOptions:
-      ssl-target-name-override: peer0-hp
+      ssl-target-name-override: peer0-dell
       grpc.http2.keepalive_time: 15
 
     tlsCACerts:
-      path: /home/nick/Projects/k8s-hyperledger-fabric-2.2/crypto-config/peerOrganizations/hp/msp/tlscacerts/hp-ca-7054.pem
+      path: /home/nick/Projects/k8s-hyperledger-fabric-2.2/crypto-config/peerOrganizations/dell/msp/tlscacerts/dell-ca-7054.pem
 
-  peer1-hp:
+  peer1-dell:
     grpcOptions:
-      ssl-target-name-override: peer1-hp
+      ssl-target-name-override: peer1-dell
       grpc.http2.keepalive_time: 15
 
     tlsCACerts:
-      path: /home/nick/Projects/k8s-hyperledger-fabric-2.2/crypto-config/peerOrganizations/hp/msp/tlscacerts/hp-ca-7054.pem
+      path: /home/nick/Projects/k8s-hyperledger-fabric-2.2/crypto-config/peerOrganizations/dell/msp/tlscacerts/dell-ca-7054.pem
 
 entityMatchers:
 
@@ -163,15 +163,15 @@ entityMatchers:
       sslTargetOverrideUrlSubstitutionExp: peer1-ibm
       mappedHost: peer1-ibm
 
-    - pattern: (\w*)peer0-hp(\w*)
+    - pattern: (\w*)peer0-dell(\w*)
       urlSubstitutionExp: localhost:9051
-      sslTargetOverrideUrlSubstitutionExp: peer0-hp
-      mappedHost: peer0-hp
+      sslTargetOverrideUrlSubstitutionExp: peer0-dell
+      mappedHost: peer0-dell
 
-    - pattern: (\w*)peer1-hp(\w*)
+    - pattern: (\w*)peer1-dell(\w*)
       urlSubstitutionExp: localhost:10051
-      sslTargetOverrideUrlSubstitutionExp: peer1-hp
-      mappedHost: peer1-hp
+      sslTargetOverrideUrlSubstitutionExp: peer1-dell
+      mappedHost: peer1-dell
 
   orderer:
     - pattern: (\w*)orderer0(\w*)
