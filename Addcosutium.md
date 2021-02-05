@@ -636,7 +636,7 @@ EOT
 
 chmod +x scripts/consum_modified_config.sh
 
-kubectl cp ./scripts $(kubectl get pods -o=name | grep cli-orderer0-deployment | sed "s/^.\{4\}//"):/opt/gopath/src/github.com/hyperledger/fabric/orderer
+kubectl cp ./diff_config_envelope.pb $(kubectl get pods -o=name | grep cli-orderer2-deployment | sed "s/^.\{4\}//"):/opt/gopath/src/github.com/hyperledger/fabric/orderer
 
 kubectl exec -it $(kubectl get pods -o=name | grep cli-orderer0-deployment | sed "s/^.\{4\}//") -- bash -c './scripts/consum_modified_config.sh'
 sleep 1
@@ -674,6 +674,9 @@ kubectl exec -it $(kubectl get pods -o=name | grep cli-orderer0-deployment | sed
 
 
 kubectl exec -it $(kubectl get pods -o=name | grep cli-orderer0-deployment | sed "s/^.\{4\}//") -- bash -c '\ peer channel update -f diff_config_envelope.pb  -c syschannel -o orderer0-service:7050 --tls --cafile=/var/hyperledger/orderer/msp/tlscacerts/tlsca.orderer-cert.pem'
+
+peer channel update -f diff_config_envelope.pb  -c syschannel -o orderer0-service:7050 --tls --cafile=/var/hyperledger/orderer/tls/server.crt
+
 
 
   kubectl exec -it $(kubectl get pods -o=name | grep cli-orderer0-deployment | sed "s/^.\{4\}//") -- bash -c '\
@@ -772,3 +775,6 @@ kubectl exec -it $(kubectl get pods -o=name | grep cli-peer0-oracle-deployment |
 kubectl exec -it $(kubectl get pods -o=name | grep cli-peer0-hp-deployment | sed "s/^.\{4\}//") -- bash -c 'peer chaincode query -C mainchannel -n resources -c '\''{"Args":["Index"]}'\'' -o orderer0-service:7050 --tls --cafile=/etc/hyperledger/orderers/msp/tlscacerts/orderers-ca-service-7054.pem'
 ```
 
+
+
+/opt/gopath/src/github.com/hyperledger/fabric/orderer

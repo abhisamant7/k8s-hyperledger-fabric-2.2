@@ -33,26 +33,26 @@ Organizations:
             Endorsement:
                 Type: Signature
                 Rule: "OR('ibm.member')"
-    - &hp
-        Name: hp
-        ID: hp
-        MSPDir: crypto-config/peerOrganizations/hp/msp
+    - &dell
+        Name: dell
+        ID: dell
+        MSPDir: crypto-config/peerOrganizations/dell/msp
         AnchorPeers:
-            - Host: peer0-hp-service
+            - Host: peer0-dell-service
               Port: 7051
         Policies:
             Readers:
                 Type: Signature
-                Rule: "OR('hp.member')"
+                Rule: "OR('dell.member')"
             Writers:
                 Type: Signature
-                Rule: "OR('hp.member')"
+                Rule: "OR('dell.member')"
             Admins:
                 Type: Signature
-                Rule: "OR('hp.admin')"
+                Rule: "OR('dell.admin')"
             Endorsement:
                 Type: Signature
-                Rule: "OR('hp.member')"
+                Rule: "OR('dell.member')"
 
 Capabilities:
     Global: &ChannelCapabilities
@@ -156,7 +156,7 @@ Profiles:
             MAIN1:
                 Organizations:
                     - *ibm
-                    - *hp
+                    - *dell
 
     HpChannel:
         Consortium: MAIN1
@@ -165,6 +165,6 @@ Profiles:
             <<: *ApplicationDefaults
             Organizations:
                 - *ibm
-                - *hp
+                - *dell
             Capabilities:
                 <<: *ApplicationCapabilities

@@ -56,6 +56,9 @@ spec:
             - mountPath: /var/hyperledger/orderer/msp
               name: my-pv-storage
               subPath: files/crypto-config/ordererOrganizations/orderer/users/Admin@orderer/msp
+            - mountPath: /var/hyperledger/orderer/msp/tlscert
+              name: my-pv-storage
+              subPath: files/crypto-config/ordererOrganizations/orderer/orderers/orderer0/msp
             - mountPath: /var/hyperledger/orderer/tls
               name: my-pv-storage
               subPath: files/crypto-config/ordererOrganizations/orderer/orderers/orderer0/tls
