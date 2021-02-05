@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cli-orderer2-deployment
+  labels: {
+    component: orderer2,
+    type: cli,
+    org: orderer
+  }
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: orderer2
+      type: cli
+      org: orderer
+  template:
+    metadata:
+      labels:
+        component: orderer2
+        type: cli
+        org: orderer
+    spec:
+      volumes:
+        - name: my-pv-storage
+          persistentVolumeClaim:
+            claimName: my-pv-claim
+      containers:
+        - name: orderer2-orderer
+          image: hyperledger/fabric-tools:2.2.1
+          workingDir: /opt/gopath/src/github.com/hyperledger/fabric/orderer
+          command: ["sleep"]
+          args: ["infinity"]
+          env:
+            - name: GOPATH
+              value: /opt/gopath
+            - name: CORE_PEER_ADDRESSAUTODETECT
+              value: "true"
+            - name: CORE_PEER_ID
+              value: cli-orderer2-orderer
+            - name: CORE_PEER_ADDRESS
+              value: orderer2-service:7050
+            - name: CORE_PEER_LOCALMSPID
+              value: orderer
+            - name: CORE_PEER_MSPCONFIGPATH
+              value: /var/hyperledger/orderer/msp
+            - name: CORE_PEER_TLS_ENABLED
+              value: "true"
+            - name: CORE_PEER_TLS_CERT_FILE
+              value: /var/hyperledger/orderer/tls/server.crt
+            - name: CORE_PEER_TLS_KEY_FILE
+              value: /var/hyperledger/orderer/tls/server.key
+            - name: CORE_PEER_TLS_ROOTCERT_FILE
+              value: /var/hyperledger/orderer/tls/ca.crt
+          volumeMounts:
+            - mountPath: /var/hyperledger/orderer/msp
+              name: my-pv-storage
+              subPath: files/crypto-config/ordererOrganizations/orderer/orderers/orderer2/msp
+            - mountPath: /var/hyperledger/orderer/tls
+              name: my-pv-storage
+              subPath: files/crypto-config/ordererOrganizations/orderer/orderers/orderer2/tls
+            - mountPath: /var/hyperledger/orderer/data
+              name: my-pv-storage
+              subPath: files/orderer
